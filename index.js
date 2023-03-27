@@ -1,5 +1,7 @@
 //se llama la libreria
 const express = require('express')
+//libreria para permitir origenes cruzados
+const cors = require('cors')
 //se instancia la libreria
 const app = express()
 
@@ -17,6 +19,7 @@ const unKnowEndpoind = (request, response) => {
 }
 //se agregan los middleware al app
 //para poder acceder a la información en formato json
+app.use(cors())
 app.use(express.json())
 app.use(requestLoogger)
 // los datos
