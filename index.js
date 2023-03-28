@@ -19,6 +19,7 @@ const unKnowEndpoind = (request, response) => {
 }
 //se agregan los middleware al app
 //para poder acceder a la información en formato json
+app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 app.use(requestLoogger)
