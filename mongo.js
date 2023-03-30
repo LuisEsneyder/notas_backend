@@ -18,18 +18,18 @@ const noteShema = new mongoose.Schema({
 
 const Note = mongoose.model('Note', noteShema)
 const note = new Note({
-    content: 'HTM is easy',
+    content: 'callback-funtion suck',
     important: true,
 })
 
-// note.save().then(result => {
-//     console.log('noted saved');
-//     mongoose.connection.close
-// })
-Note.find({important: false}).then(result => {
-    result.forEach(element => {
-        console.log(element);
-    } )
+note.save().then(result => {
+    console.log('noted saved');
     mongoose.connection.close()
 })
+// Note.find({important: false}).then(result => {
+//     result.forEach(element => {
+//         console.log(element);
+//     } )
+//     mongoose.connection.close()
+// })
 

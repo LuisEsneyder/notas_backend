@@ -1,10 +1,23 @@
 //se llama la libreria
 const express = require('express')
+//libreria para conectarse a la base de datos
+const mongoose = require('mongoose')
 //libreria para permitir origenes cruzados
 const cors = require('cors')
 //se instancia la libreria
 const app = express()
-
+const password = process.argv[2]
+//comenzamos haciendo la conección y modelos para la base de datos
+const url = `mongodb+srv://luisexneider1999:${password}@fullstack.jcfodl0.mongodb.net/?retryWrites=true&w=majority`
+mongoose.set('strictQuery', false)
+mongoose.connect(url)
+//se crea el esquema
+const noteSchema = mongoose.Schema({
+    content: String,
+    important: Boolean,
+})
+//se crea el modelo
+const Note = mongoose.model('Note', noteSchema)
 //se crea un middleware, para poder observar lo que se envia al server
 const requestLoogger = (request, response, next) => {
     console.log('Method:', request.method);
@@ -23,24 +36,7 @@ app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 app.use(requestLoogger)
-// los datos
-let notes = [
-    {
-        id: 1,
-        content: 'HTML is easy',
-        important: true
-    },
-    {
-        id: 2,
-        content: 'Browser can execute only JavaScript',
-        important: false
-    },
-    {
-        id: 3,
-        content: 'GET and POST are the most important methods of HTTP protocol',
-        important: true
-    },
-]
+
 const generateId = () => {
     const maxId = notes.length > 0
         ? Math.max(...notes.map(element => element.id))
@@ -54,7 +50,9 @@ app.get('/', (request, response) => {
 })
 //ruta para obtener las notas
 app.get('/api/notes', (request, response) => {
-    response.json(notes)
+    Note.find({}).then(notes => {
+        response.json(notes)
+    })
 })
 //ruta para obtener una sola nota
 app.get('/api/notes/:id', (request, response) => {
