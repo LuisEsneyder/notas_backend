@@ -1,23 +1,13 @@
 //se llama la libreria
+require('dotenv').config()
 const express = require('express')
-//libreria para conectarse a la base de datos
-const mongoose = require('mongoose')
+//se llama el modelo de notas que permite la conección d¿con la base de datos
+const Note = require('./models/note')
 //libreria para permitir origenes cruzados
 const cors = require('cors')
 //se instancia la libreria
 const app = express()
-const password = process.argv[2]
-//comenzamos haciendo la conección y modelos para la base de datos
-const url = `mongodb+srv://luisexneider1999:${password}@fullstack.jcfodl0.mongodb.net/?retryWrites=true&w=majority`
-mongoose.set('strictQuery', false)
-mongoose.connect(url)
-//se crea el esquema
-const noteSchema = mongoose.Schema({
-    content: String,
-    important: Boolean,
-})
-//se crea el modelo
-const Note = mongoose.model('Note', noteSchema)
+
 //se crea un middleware, para poder observar lo que se envia al server
 const requestLoogger = (request, response, next) => {
     console.log('Method:', request.method);
