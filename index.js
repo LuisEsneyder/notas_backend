@@ -46,13 +46,10 @@ app.get('/api/notes', (request, response) => {
 })
 //ruta para obtener una sola nota
 app.get('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = notes.find(element => element.id === id)
-    if(note){
+    const id = request.params.id
+    Note.find({_id : id}).then(note => {
         response.json(note)
-        return
-    }
-    response.status(404).end()
+    })
 })
 //ruta para eliminar una sola nota usando el id
 app.delete('/api/notes/:id', (request, response) => {
@@ -68,14 +65,17 @@ app.post('/api/notes', (request, response) => {
             error: 'content missing'
         })
     }
-    const note = {
+    //se instancia el modelo para crear una nota    
+    const note = new Note({
         content: body.content,
-        import: body.important || false,
-        id: generateId()
-    }
-    notes = notes.concat(note)
-    response.status(200).json(note)
+        important: body.important || false,
+    }) 
+    note.save().then(savedNote => {
+        response.json(savedNote)
+    })
 })
+//para encontrar una nota por el id
+
 //se llama el middleware cuando se intenta acceder a una ruta que no existe
 app.use(unKnowEndpoind)
 const PORT = process.env.PORT || 3001
