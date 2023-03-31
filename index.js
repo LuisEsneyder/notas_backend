@@ -20,6 +20,14 @@ const requestLoogger = (request, response, next) => {
 const unKnowEndpoind = (request, response) => {
     response.status(400).send({error: 'unknow endpoint'})
 }
+//middelwere para manejar los errores, debe ser el ultimo en cargar
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message);
+    if(error.name === 'CastError'){
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    next(error)
+}
 //se agregan los middleware al app
 //para poder acceder a la información en formato json
 app.use(express.static('build'))
@@ -27,12 +35,6 @@ app.use(cors())
 app.use(express.json())
 app.use(requestLoogger)
 
-const generateId = () => {
-    const maxId = notes.length > 0
-        ? Math.max(...notes.map(element => element.id))
-        : 0
-    return maxId + 1
-}
 //se crean las rutas para hacer las peticiones:
 // ruta home de la aplicaión
 app.get('/', (request, response) => {
@@ -45,17 +47,23 @@ app.get('/api/notes', (request, response) => {
     })
 })
 //ruta para obtener una sola nota
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
     const id = request.params.id
-    Note.find({_id : id}).then(note => {
-        response.json(note)
-    })
+    Note.findById(id).then(note => {
+        if (note){
+            response.json(note)
+            return
+        }
+        response.status(400).end()
+    }).catch(error => next(error))
+
 })
 //ruta para eliminar una sola nota usando el id
-app.delete('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(element => element.id !== id)
-    response.status(202).end()
+app.delete('/api/notes/:id', (request, response, next) => {
+    Note.findByIdAndRemove(request.params.id).then(result => {
+        response.status(202).end()
+    })
+    .catch(error => next(error))
 })
 //ruta para crear una nueva nota
 app.post('/api/notes', (request, response) => {
@@ -74,10 +82,22 @@ app.post('/api/notes', (request, response) => {
         response.json(savedNote)
     })
 })
-//para encontrar una nota por el id
+//ruta para actualizar
+app.put('/api/notes/:id',(request, response, next) => {
+    const body = request.body
+    const note = {
+        content: body.content,
+        important: body.important,
+    }
+    Note.findByIdAndUpdate(request.params.id, note, {new: true}).then(result => {
+        response.json(result)
+    }).catch(error => next(error))
+    
+})
 
 //se llama el middleware cuando se intenta acceder a una ruta que no existe
 app.use(unKnowEndpoind)
+app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log((`Server running on port ${PORT}`))
