@@ -26,6 +26,9 @@ const errorHandler = (error, request, response, next) => {
     if(error.name === 'CastError'){
         return response.status(400).send({ error: 'malformatted id' })
     }
+    if(error.name ==='ValidationError'){
+        return response.status(400).json({ error: error.message })
+    }
     next(error)
 }
 //se agregan los middleware al app
@@ -66,13 +69,8 @@ app.delete('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 //ruta para crear una nueva nota
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
     const body = request.body
-    if(!body.content){
-        response.status(400).json({
-            error: 'content missing'
-        })
-    }
     //se instancia el modelo para crear una nota    
     const note = new Note({
         content: body.content,
@@ -80,16 +78,16 @@ app.post('/api/notes', (request, response) => {
     }) 
     note.save().then(savedNote => {
         response.json(savedNote)
-    })
+    }).catch(error => next(error))
 })
 //ruta para actualizar
 app.put('/api/notes/:id',(request, response, next) => {
-    const body = request.body
+    const {content, important} = request.body
     const note = {
-        content: body.content,
-        important: body.important,
+        content,
+        important
     }
-    Note.findByIdAndUpdate(request.params.id, note, {new: true}).then(result => {
+    Note.findByIdAndUpdate(request.params.id, note, {new: true, runValidators: true, context:'query'}).then(result => {
         response.json(result)
     }).catch(error => next(error))
     

@@ -3,14 +3,14 @@ Content-Type: application/json
 
 
 {
-    "content": "prueba dos desde vsCode",
-    "important": false
+    "content": "si es factibles",
+    "important": true 
 }
 ###
 PUT  http://localhost:3001/api/notes/6425c076b5a0e493028a5178
 Content-Type: application/json
 
 {
-    "content": "HTML is easy",
-    "important": false 
+    "content": "s",
+    "important": true 
 }

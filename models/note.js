@@ -12,7 +12,11 @@ mongoose.connect(url).then(result => {
 })
 //creamos el esquema para notas
 const noteSchema = mongoose.Schema({
-    content: String,
+    content:{
+        type: String,
+        minLength: 5,
+        required: true
+    },
     important: Boolean,
 })
 //modificamos el guardado de los datos
